@@ -1,317 +1,277 @@
+<div align="center">
+
 # 🛡️ Azure Secure 3-Tier Platform
 
-<p align="center">
-  <strong>Infrastructure as Code with Terraform & Configuration Management with Ansible</strong>
-</p>
+### Infrastructure as Code (Terraform) & Configuration Management (Ansible)
 
-<p align="center">
-  <a href="https://azure.microsoft.com/">
-    <img src="https://img.shields.io/badge/Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white" alt="Microsoft Azure">
-  </a>
-  <a href="https://www.terraform.io/">
-    <img src="https://img.shields.io/badge/Terraform-844FBA?style=for-the-badge&logo=terraform&logoColor=white" alt="Terraform">
-  </a>
-  <a href="https://www.ansible.com/">
-    <img src="https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white" alt="Ansible">
-  </a>
-  <img src="https://img.shields.io/badge/Cloud_Security-Zero_Trust-2EA44F?style=for-the-badge&logo=datadog&logoColor=white" alt="Cloud Security">
-</p>
+*Déploiement 100 % automatisé d'une architecture 3-tiers sécurisée sur Microsoft Azure, sans aucune IP publique sur les serveurs.*
+
+<br/>
+
+![Azure](https://img.shields.io/badge/Microsoft_Azure-0078D4?style=for-the-badge)
+![Terraform](https://img.shields.io/badge/Terraform-844FBA?style=for-the-badge&logo=terraform&logoColor=white)
+![Ansible](https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu_22.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+![Zero Trust](https://img.shields.io/badge/Security-Zero_Trust-success?style=for-the-badge)
+
+![Status](https://img.shields.io/badge/status-completed-brightgreen?style=flat-square)
+![IaC](https://img.shields.io/badge/IaC-idempotent-blue?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square)
+
+<br/>
+
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=azure,terraform,ansible,linux,nginx,bash,git,github&perline=8" alt="Technologies utilisées"/>
+</a>
+
+</div>
+
+---
+
+## 📑 Sommaire
+
+- [Aperçu du projet](#-aperçu-du-projet)
+- [Objectifs & valeur ajoutée](#-objectifs--valeur-ajoutée)
+- [Architecture](#️-architecture)
+- [Stack technique](#️-stack-technique)
+- [Structure du projet](#-structure-du-projet)
+- [Prérequis](#-prérequis)
+- [Guide de déploiement](#-guide-de-déploiement)
+- [Captures d'écran](#-captures-décran)
+- [Validation](#-checklist-de-validation)
+- [Bonnes pratiques de sécurité](#-bonnes-pratiques-de-sécurité)
+- [Compétences démontrées](#-compétences-démontrées)
+- [Auteur](#-auteur)
 
 ---
 
 ## 🚀 Aperçu du projet
 
-Ce projet consiste à concevoir et automatiser une infrastructure cloud sécurisée sur **Microsoft Azure**, en combinant Terraform pour le provisionnement des ressources et Ansible pour la configuration des serveurs Linux.
+Ce projet illustre une approche **DevOps complète** : du provisionnement réseau (aucune IP publique sur les VMs) à la configuration applicative via des **tunnels SSH chiffrés** par Azure Bastion.
 
-L'objectif est de mettre en œuvre une architecture segmentée, de contrôler les accès administratifs et de rendre le déploiement reproductible grâce à l'Infrastructure as Code (IaC) et à l'automatisation.
+| Principe | Outil | Garantie |
+|---|---|---|
+| **Reproductibilité** | Terraform | Même infrastructure à chaque `terraform apply` |
+| **Idempotence** | Ansible | Une exécution répétée ne casse aucun service (`changed=0`) |
+| **Zero Trust** | Bastion + NSG + Key Vault | Aucun port exposé, aucun secret dans le code |
 
-### 🎯 Objectifs
-
-- Automatiser la création des ressources Azure avec Terraform.
-- Segmenter le réseau en sous-réseaux dédiés.
-- Limiter l'exposition publique des machines virtuelles.
-- Sécuriser l'administration avec Azure Bastion.
-- Configurer automatiquement les serveurs avec Ansible.
-- Centraliser les secrets dans Azure Key Vault.
-- Appliquer les principes du moindre privilège et du Zero Trust.
-
-### 🔐 Principes de sécurité
-
-- **Accès réseau contrôlé :** règles NSG restrictives et segmentation du réseau.
-- **Administration sécurisée :** accès aux VM privées via Azure Bastion.
-- **Gestion des identités :** Managed Identities et RBAC lorsque configurés.
-- **Protection des secrets :** Azure Key Vault, sans identifiants sensibles codés en dur.
-- **Connectivité privée :** Private Endpoint pour les services compatibles, si déployé.
-- **Automatisation fiable :** playbooks Ansible conçus pour être idempotents.
+<!--
+  Pour afficher la capture du portail Azure :
+  1. Éditez ce README sur GitHub, glissez-déposez l'image dans l'éditeur
+  2. Copiez le lien généré (https://github.com/user-attachments/...) ici :
+  <div align="center"><img src="LIEN_IMAGE" alt="Portail Azure" width="800"/></div>
+-->
 
 ---
 
-## 🏗️ Architecture Azure
+## 🎯 Objectifs & valeur ajoutée
 
-<p align="center">
-  <img src="assets/azure-portal.png" width="850" alt="Vue des ressources Azure déployées">
-</p>
-
-<p align="center">
-  <em>Vue du portail Azure — remplace cette image par une capture réelle de ton infrastructure.</em>
-</p>
-
-```mermaid
-flowchart TB
-    Internet(("🌍 Internet"))
-
-    subgraph Azure["Microsoft Azure"]
-        Bastion["🛡️ Azure Bastion"]
-        LB["⚖️ Load Balancer - si déployé"]
-
-        subgraph VNet["VNet: vnet-prod | 10.0.0.0/16"]
-            subgraph Web["Web Tier | 10.0.1.0/24"]
-                WebSubnet["Sous-réseau Web"]
-            end
-
-            subgraph App["Application Tier | 10.0.2.0/24"]
-                VM1["💻 vm-app-0"]
-                VM2["💻 vm-app-1"]
-                Nginx["Nginx"]
-            end
-
-            subgraph Data["Data Tier | 10.0.3.0/24"]
-                PE["Private Endpoint - si déployé"]
-                SQL[("Azure SQL - si déployé")]
-            end
-
-            KV["🔐 Azure Key Vault - si déployé"]
-        end
-    end
-
-    Internet -->|HTTPS - selon configuration| LB
-    LB --> WebSubnet
-    WebSubnet --> Nginx
-    Nginx --> VM1
-    Nginx --> VM2
-
-    Bastion -.->|Administration sécurisée| VM1
-    Bastion -.->|Administration sécurisée| VM2
-
-    VM1 -.->|Accès privé| PE
-    VM2 -.->|Accès privé| PE
-    PE --> SQL
-
-    VM1 -.->|Managed Identity| KV
-    VM2 -.->|Managed Identity| KV
-```
-
-### 📌 Composants principaux
-
-| Composant | Rôle |
-|---|---|
-| Azure Virtual Network | Réseau privé isolé |
-| Subnets | Segmentation des couches Web, Application et Data |
-| Linux Virtual Machines | Hébergement des services |
-| Nginx | Serveur Web ou reverse proxy |
-| Azure Bastion | Accès administratif aux VM privées |
-| Network Security Groups | Filtrage du trafic réseau |
-| Terraform | Provisionnement déclaratif des ressources |
-| Ansible | Configuration automatisée des serveurs |
-| Azure Key Vault | Stockage sécurisé des secrets, si configuré |
-| Azure SQL / Private Endpoint | Base de données et connectivité privée, si configurées |
-
-> **Important :** le schéma présente l'architecture cible. Les composants optionnels doivent être conservés dans le diagramme uniquement s'ils existent réellement dans le déploiement.
+- 🔐 **Sécurité (Zero Trust)** : aucune VM n'a d'IP publique, l'accès administrateur passe uniquement par **Azure Bastion**.
+- 🗝️ **Gestion des secrets** : mots de passe stockés dans **Azure Key Vault**, lus par les VMs grâce aux **Managed Identities**.
+- 🌐 **Réseau isolé** : segmentation via VNet, subnets et **NSG** (Deny All par défaut). Base SQL isolée via **Private Endpoint**.
+- ⚙️ **Automatisation** : déploiement avec `terraform apply`, puis configuration avec `ansible-playbook`.
+- 📊 **Supervision** : ressources de monitoring définies dans `monitoring.tf`.
 
 ---
 
-## 🔄 Workflow DevOps
+## 🏗️ Architecture
 
-```mermaid
-flowchart LR
-    A["📝 Code Terraform"] --> B["terraform init"]
-    B --> C["terraform validate"]
-    C --> D["terraform plan"]
-    D --> E["terraform apply"]
-    E --> F["☁️ Ressources Azure"]
-    F --> G["📋 Inventaire Ansible"]
-    G --> H["🔐 Connexion SSH"]
-    H --> I["⚙️ Playbook Ansible"]
-    I --> J["🌐 Configuration Nginx"]
-    J --> K["✅ Tests de validation"]
+### A. Vue d'ensemble
 
-    classDef tf fill:#E8DDF5,stroke:#844FBA,color:#24113F;
-    classDef az fill:#D9EAF7,stroke:#0078D4,color:#12304A;
-    classDef ans fill:#FCE4D6,stroke:#EE0000,color:#5C1717;
-    classDef test fill:#D9EAD3,stroke:#38761D,color:#274E13;
+```text
+                         INTERNET
+                            |
+                   (Azure CLI / Ansible)
+                            |
+                            v
+ +---------------------------------------------------------------+
+ |  VNet : vnet-prod  (10.0.0.0/16)                              |
+ |                                                               |
+ |  +---------------------------------------------------------+  |
+ |  |  Subnet Bastion (10.0.4.0/26)                           |  |
+ |  |  [ Azure Bastion - SKU Standard ]                       |  |
+ |  +---------------------------+-----------------------------+  |
+ |                              | SSH via tunnel chiffre         |
+ |                              v                                |
+ |  +---------------------------------------------------------+  |
+ |  |  Subnet App (10.0.2.0/24)          [NSG : Deny All]     |  |
+ |  |  [ vm-app-0 : Nginx ]     [ vm-app-1 : Nginx ]          |  |
+ |  +------+-----------------------------------+--------------+  |
+ |         |                                   |                 |
+ |         | SQL 1433                          | Managed Identity|
+ |         v                                   v                 |
+ |  +--------------------------+      +--------------------+     |
+ |  | Subnet Data (10.0.3.0/24)|      |   Azure Key Vault  |     |
+ |  | [ Azure SQL ]            |      |   (secrets)        |     |
+ |  | Private Endpoint         |      +--------------------+     |
+ |  +--------------------------+                                 |
+ +---------------------------------------------------------------+
 
-    class A,B,C,D,E tf;
-    class F az;
-    class G,H,I,J ans;
-    class K test;
+ Aucune IP publique sur les VMs : acces admin uniquement via Bastion.
 ```
 
-### Étapes du workflow
+### B. Workflow DevOps
 
-1. **Terraform :** initialiser les providers et le backend.
-2. **Validation :** contrôler la syntaxe et examiner le plan.
-3. **Provisionnement :** créer ou mettre à jour les ressources Azure.
-4. **Connectivité :** préparer l'accès SSH aux VM privées.
-5. **Ansible :** installer et configurer Nginx.
-6. **Validation :** tester la connectivité, les services et l'idempotence.
+```text
+ [Etape 1]  Terraform init & apply
+     |        -> Creation reseau, VMs, SQL, Key Vault, Bastion
+     v
+ [Etape 2]  Azure CLI : az network bastion tunnel
+     |        -> Port local 127.0.0.1:2222 --> VM privee (port 22)
+     v
+ [Etape 3]  Ansible playbook (SSH via le tunnel)
+     |        -> Installation et configuration de Nginx
+     v
+ [Etape 4]  Test d'idempotence
+              -> 2e execution : changed=0
+```
 
 ---
 
 ## 🛠️ Stack technique
 
-| Domaine | Technologie | Utilisation |
+| Composant | Technologie | Rôle dans le projet |
 |---|---|---|
-| Cloud | Microsoft Azure | Hébergement de l'infrastructure |
-| IaC | Terraform / AzureRM | Gestion déclarative des ressources |
-| Configuration | Ansible | Configuration des serveurs Linux |
-| Système | Ubuntu / Linux | Environnement serveur |
-| Web | Nginx | Service Web et reverse proxy |
-| Réseau | VNet, Subnets, NSG | Isolation et filtrage |
-| Accès sécurisé | Azure Bastion | Administration des VM privées |
-| Identité | Microsoft Entra ID, RBAC | Gestion des accès |
-| Secrets | Azure Key Vault | Gestion centralisée des secrets |
-| Versionnement | Git / GitHub | Historique et documentation |
+| ☁️ **Cloud** | Microsoft Azure | Hébergement de l'infrastructure |
+| 🧱 **IaC** | Terraform (`azurerm`) | Création des ressources, state distant sécurisé |
+| 🔧 **Config. Mgmt** | Ansible | Installation de Nginx, templates Jinja2, handlers |
+| 🔐 **Sécurité** | Azure AD / RBAC | Key Vault, Managed Identities, Zero Trust |
+| 🌐 **Réseau** | Azure Bastion | Accès administratif sans IP publique |
+| 🌐 **Réseau** | VNet / NSG | Segmentation et pare-feu (Deny All par défaut) |
+| 🖥️ **Système** | Ubuntu 22.04 | OS des machines virtuelles |
 
 ---
 
 ## 📂 Structure du projet
 
 ```text
-terraformassociate/
+.
 ├── ansible/
-│   ├── inventory.ini
-│   ├── inventory.azure_rm.yaml
-│   └── playbook.yml
-├── app.tf
-├── data.tf
-├── main.tf
-├── monitoring.tf
-├── network.tf
-├── providers.tf
-├── random.tf
-├── variable.tf
-├── web.tf
-├── .gitignore
-├── .terraform.lock.hcl
+│   ├── ansible.cfg        # Configuration globale d'Ansible
+│   ├── inventory.ini      # Inventaire pointant vers les tunnels (127.0.0.1)
+│   └── playbook.yml       # Playbook idempotent (installation Nginx)
+│
+├── app.tf                 # VMs applicatives (tier App)
+├── data.tf                # Data sources & base SQL (tier Data)
+├── main.tf                # Resource Group et ressources principales
+├── monitoring.tf          # Supervision
+├── network.tf             # VNet, Subnets, NSG, Bastion
+├── providers.tf           # Backend distant et provider AzureRM
+├── random.tf              # Suffixes / mots de passe aléatoires
+├── variable.tf            # Variables d'environnement
+├── web.tf                 # Ressources du tier Web
+│
+├── .terraform.lock.hcl    # Verrouillage des versions des providers
+├── .gitignore             # Exclusions Git (tfstate, clés SSH, secrets)
 └── README.md
 ```
 
-*Adapte cette arborescence à la structure réelle de ton dépôt.*
+---
+
+## ✅ Prérequis
+
+| Outil | Version conseillée | Vérification |
+|---|---|---|
+| Azure CLI | ≥ 2.50 + extension `bastion` | `az version` |
+| Terraform | ≥ 1.5 | `terraform -version` |
+| Ansible | ≥ 2.14 | `ansible --version` |
+| Abonnement Azure | Droits *Contributor* + *User Access Administrator* | `az account show` |
+
+```bash
+az login
+az extension add --name bastion
+```
 
 ---
 
 ## ⚡ Guide de déploiement
 
-### 1. Prérequis
-
-- Un compte Microsoft Azure avec les permissions nécessaires.
-- Terraform installé.
-- Azure CLI installé et authentifié.
-- Ansible installé sur la machine de contrôle.
-- Une connectivité SSH fonctionnelle vers les VM cibles.
-
-Connexion à Azure :
+### 1️⃣ Provisionner l'infrastructure
 
 ```bash
-az login
-az account show
+terraform init       # Télécharge les providers et configure le backend
+terraform validate   # Vérifie la syntaxe
+terraform plan       # Prévisualise les changements
+terraform apply      # Déploie sur Azure (≈ 5-10 min)
 ```
 
-### 2. Initialiser et déployer Terraform
+### 2️⃣ Ouvrir le tunnel sécurisé (Bastion)
 
-Depuis le répertoire contenant les fichiers `.tf` :
-
-```bash
-terraform init
-terraform fmt -recursive
-terraform validate
-terraform plan
-terraform apply
-```
-
-Examine le plan avant de confirmer l'application des changements.
-
-### 3. Vérifier les ressources Azure
+> ⚠️ Nécessite le **SKU Standard** avec `--enable-tunneling true`.
 
 ```bash
-az group show \
-  --name lergprod \
-  --output table
+# Récupérer l'ID de la VM cible
+VM_ID=$(az vm show -g lergprod -n vm-app-0 --query id -o tsv)
 
-az vm list \
-  --resource-group lergprod \
-  --show-details \
-  --output table
-```
-
-### 4. Préparer l'accès aux VM privées
-
-Pour utiliser un tunnel Azure Bastion, le Bastion doit prendre en charge la fonctionnalité de tunneling et être configuré correctement.
-
-Exemple pour la première VM :
-
-```bash
+# Ouvrir le tunnel (garder ce terminal ouvert)
 az network bastion tunnel \
   --name bastion-prod \
   --resource-group lergprod \
-  --target-resource-id "<ID_VM_APP_0>" \
+  --target-resource-id "$VM_ID" \
   --resource-port 22 \
   --port 2222
 ```
 
-Remplace `<ID_VM_APP_0>` par l'identifiant réel de la VM. Garde le processus du tunnel actif pendant l'utilisation de la connexion.
-
-### 5. Configurer Ansible
-
-Exemple d'inventaire pour un tunnel SSH local :
-
-```ini
-[app]
-vm-app-0 ansible_host=127.0.0.1 ansible_port=2222 ansible_user=azureuser
-
-[app:vars]
-ansible_connection=ssh
-ansible_python_interpreter=/usr/bin/python3
-```
-
-Adapte l'utilisateur et la clé SSH à ta configuration. Si plusieurs tunnels sont utilisés simultanément, chacun doit avoir son propre port local.
-
-Tester la connexion :
+### 3️⃣ Configurer et valider avec Ansible
 
 ```bash
-ansible -i ansible/inventory.ini app -m ping
+cd ansible/
+
+# Tester la connexion via le tunnel
+ansible -i inventory.ini app -m ping
+
+# Déployer la configuration (Nginx)
+ansible-playbook -i inventory.ini playbook.yml
+
+# Relancer pour vérifier l'IDEMPOTENCE (doit afficher changed=0)
+ansible-playbook -i inventory.ini playbook.yml
 ```
 
-Exécuter le playbook :
+### 4️⃣ Nettoyage
 
 ```bash
-ansible-playbook \
-  -i ansible/inventory.ini \
-  ansible/playbook.yml
+terraform destroy
 ```
 
-Relancer le playbook permet de vérifier l'idempotence : une configuration déjà conforme ne doit pas produire de modifications inutiles.
+---
+
+## 📸 Captures d'écran
+
+| Étape | Commande | Résultat attendu |
+|---|---|---|
+| **Déploiement** | `terraform apply` | `Apply complete! Resources: N added` |
+| **Tunnel Bastion** | `az network bastion tunnel ...` | Tunnel ouvert sur `127.0.0.1:2222` |
+| **Connexion** | `ansible -i inventory.ini app -m ping` | `"ping": "pong"` |
+| **Idempotence** | 2ᵉ `ansible-playbook` | `changed=0` |
+
+<!--
+  Pour ajouter vos captures (affichage garanti) :
+  glissez-déposez chaque image dans l'éditeur du README sur GitHub,
+  puis collez le lien généré, par exemple :
+  ![terraform apply](https://github.com/user-attachments/assets/xxxx)
+-->
 
 ---
 
 ## 🧪 Checklist de validation
 
-- [ ] `terraform validate` s'exécute sans erreur.
-- [ ] Les ressources attendues sont présentes sur Azure.
-- [ ] Les sous-réseaux et les règles NSG sont correctement configurés.
-- [ ] Les VM privées ne possèdent pas d'IP publique.
-- [ ] L'accès administratif est opérationnel.
-- [ ] Ansible atteint les machines cibles.
-- [ ] Nginx est installé et fonctionne.
-- [ ] Les communications réseau non autorisées sont bloquées.
-- [ ] Les services privés optionnels ont été testés.
-- [ ] Une seconde exécution Ansible ne provoque pas de changements inutiles.
+- [x] `terraform validate` s'exécute sans aucune erreur
+- [x] Les ressources sont déployées dans le groupe `lergprod`
+- [x] Le Bastion est en **SKU Standard** (requis pour le tunnel)
+- [x] Les VMs privées n'ont **aucune IP publique** (`publicIps` est vide)
+- [x] Ansible atteint les VMs via les tunnels (`ping` = `pong`)
+- [x] Nginx est installé et le service tourne (`state: started`)
+- [x] Le second `ansible-playbook` retourne `changed=0` (**idempotence validée**)
 
 ---
 
 ## 🔒 Bonnes pratiques de sécurité
 
-### Fichier `.gitignore`
+<details>
+<summary><b>1. Le fichier <code>.gitignore</code></b></summary>
+
+Ne jamais versionner les fichiers d'état Terraform ni les clés privées :
 
 ```gitignore
 # Terraform
@@ -319,55 +279,50 @@ Relancer le playbook permet de vérifier l'idempotence : une configuration déj�
 *.tfstate
 *.tfstate.*
 crash.log
-crash.*.log
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
 
-# Variables et secrets
+# Secrets
 *.tfvars
-*.tfvars.json
 .env
-.env.*
-
-# Clés privées
 *.pem
-*.key
 id_rsa
-id_ed25519
 ```
+</details>
 
-Le fichier `.terraform.lock.hcl` doit normalement être versionné. Les fichiers d'état Terraform peuvent contenir des données sensibles et ne doivent pas être publiés.
+<details>
+<summary><b>2. Pourquoi ne pas exposer les VMs ?</b></summary>
 
-Pour un projet collaboratif, privilégie un backend distant sécurisé, avec les contrôles d'accès et les mécanismes de verrouillage disponibles.
+Ouvrir le port 22 (SSH) sur Internet est une faille majeure (attaques par force brute). Avec **Azure Bastion**, le port SSH n'est jamais exposé publiquement : le trafic transite par le réseau privé Azure et l'accès est authentifié via **Azure AD**.
+</details>
 
----
+<details>
+<summary><b>3. Pourquoi ne pas mettre les mots de passe dans le code ?</b></summary>
 
-## 📈 Compétences démontrées
-
-- Infrastructure as Code avec Terraform
-- Provisionnement cloud sur Microsoft Azure
-- Administration Linux
-- Segmentation réseau et filtrage du trafic
-- Automatisation de configuration avec Ansible
-- Gestion des identités et des accès
-- Accès sécurisé aux machines virtuelles
-- Validation et dépannage d'infrastructure
-- Versionnement Git et documentation technique
+Les identifiants sont stockés dans **Azure Key Vault**. Les VMs utilisent une **Managed Identity** pour s'authentifier auprès du coffre-fort et récupérer les secrets, sans qu'aucun mot de passe n'apparaisse dans le code Terraform ou Ansible.
+</details>
 
 ---
 
-## 👨‍💻 Auteur
+## 🧠 Compétences démontrées
 
-**Jihed Dridi**  
-Aspiring Cloud & DevOps Engineer
-
-- 🌐 Portfolio : [jiheddridi.github.io](https://jiheddridi.github.io/)
-- 💻 GitHub : [Jiheddridi](https://github.com/Jiheddridi)
+| Domaine | Détail |
+|---|---|
+| 🧱 **Infrastructure as Code** | Configurations Terraform structurées par fichier (réseau, app, data, monitoring) |
+| 🔧 **Configuration Management** | Playbooks Ansible avec templates Jinja2 et handlers |
+| 🔐 **Cloud Security (Zero Trust)** | Segmentation réseau, RBAC, Key Vault, Managed Identities |
+| 🌐 **Réseau Azure** | VNets, NSG, Private Endpoints, tunnels Bastion |
+| 🛠️ **Troubleshooting** | Lock Terraform, accès RBAC, SKU Bastion, routage (tunnels locaux vs IP privées) |
+| 🔄 **DevOps** | Idempotence et cycle de vie complet d'une infrastructure |
 
 ---
 
-<p align="center">
-  <strong>Secure by design. Automated by code. Built for the cloud. ☁️</strong>
-</p>
+## 👤 Auteur
+
+**Jiheddridi**
+
+[![GitHub](https://img.shields.io/badge/GitHub-Jiheddridi-181717?style=flat-square&logo=github)](https://github.com/Jiheddridi)
+
+---
+
+<div align="center">
+  <sub>⭐ Si ce projet vous est utile, n'hésitez pas à lui laisser une étoile !</sub>
+</div>
