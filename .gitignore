@@ -1,0 +1,20 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Variables sensibles
+*.tfvars
+*.tfvars.json
+
+# Clés privées
+*.pem
+*.key
+id_rsa
+id_ed25519

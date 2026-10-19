@@ -1,0 +1,48 @@
+---
+- name: Configurer la couche applicative
+  hosts: app
+  become: true
+
+  vars:
+    jihedservice: nginx
+    jihedtitle: "App Tier"
+    jihedport: 80
+
+  tasks:
+    - name: Installer {{ jihedservice }}
+      ansible.builtin.apt:
+        name: "{{ jihedservice }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Déposer la page d'accueil
+      ansible.builtin.copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head><title>{{ jihedtitle }}</title></head>
+          <body>
+            <h1>{{ jihedtitle }}</h1>
+            <p>Package: {{ jihedservice }}</p>
+            <p>Host: <strong>{{ inventory_hostname }}</strong></p>
+            <p>Private IP: {{ ansible_default_ipv4.address }}</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: "0644"
+      notify: Reload service
+
+    - name: Vérifier que le service tourne
+      ansible.builtin.service:
+        name: "{{ jihedservice }}"
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload service
+      ansible.builtin.service:
+        name: "{{ jihedservice }}"
+        state: restarted
